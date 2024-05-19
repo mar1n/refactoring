@@ -30,38 +30,49 @@ function playFor(aPerformance) {
 }
 
 function volumeCreditsFor(aPerformance) {
-    let result = 0;
-    result += Math.max(aPerformance.audience - 30, 0);
-    if ("comedy" === playFor(aPerformance).type) 
+  let result = 0;
+  result += Math.max(aPerformance.audience - 30, 0);
+  if ("comedy" === playFor(aPerformance).type)
     result += Math.floor(aPerformance.audience / 5);
-    return result;
+  return result;
 }
 
 function usd(aNumber) {
-    return new Intl.NumberFormat("en-US",
-    { style: "currency", currency: "USD",
-    minimumFractionDigits: 2 }).format(aNumber);
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+  }).format(aNumber);
+}
+
+function totalVolumeCredits(invoice) {
+  let volumeCredits = 0;
+  for (let perf of invoice.performances) {
+    volumeCredits += volumeCreditsFor(perf);
+  }
+  return volumeCredits;
+}
+
+function totalAmount(invoice) {
+  let result = 0;
+  for (let perf of invoice.performances) {
+    result += amountFor(perf);
+  }
+  return result;
 }
 
 function statement(invoice) {
-  let totalAmount = 0;
-  let volumeCredits = 0;
-  let result = `Statement for ${invoice.customer}\n`;
-  
-  for (let perf of invoice.performances) {
-    // add volume credits
-    volumeCredits += volumeCreditsFor(perf);
-    // add extra credit for every ten comedy attendees
-    if ("comedy" === playFor(perf).type)
-      volumeCredits += Math.floor(perf.audience / 5);
-    // print line for this order
-    result += ` ${playFor(perf).name}: ${usd(amountFor(perf) / 100)} (${
-      perf.audience
-    } seats)\n`;
-    totalAmount += amountFor(perf);
-  }
-  result += `Amount owed is ${usd(totalAmount / 100)}\n`;
-  result += `You earned ${volumeCredits} credits\n`;
+    let result = `Statement for ${invoice.customer}\n`;
+    
+    for (let perf of invoice.performances) {
+        // print line for this order
+        result += ` ${playFor(perf).name}: ${usd(amountFor(perf) / 100)} (${
+            perf.audience
+        } seats)\n`;
+    }
+
+  result += `Amount owed is ${usd(totalAmount(invoice) / 100)}\n`;
+  result += `You earned ${totalVolumeCredits(invoice)} credits\n`;
   return result;
 }
 
