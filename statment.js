@@ -1,3 +1,23 @@
+import { writeFile, writeFileSync } from 'fs';
+
+function renderHtmlMarkup(invoice) {
+  return `
+    Statment for ${invoice.customer}
+    </br>
+    Amount owed is ${usd(totalAmount(invoice.performances))}
+    </br>
+    You earned ${totalVolumeCredits(invoice.performances)} credits`;
+}
+
+function createFile(fileType, content) {
+  writeFile(`statement.${fileType}`, content, (err) => {
+    if (err) {
+        console.error('An error occurred while writing to the file:', err);
+    } else {
+        console.log('File has been created successfully!');
+    }
+});
+}
 function amountFor(aPerformance) {
   let result = 0;
   switch (aPerformance.play.type) {
@@ -68,23 +88,8 @@ function totalAmount(data) {
   return data.reduce((total, p) => total + p.amount, 0);
 }
 
-function statement(invoice, plays) {
-  let result = `Statment for ${invoice.customer}\n`;
-  for (let perf of invoice.performances) {
-    console.log("perf", perf);
-    console.log("playFor(perf).name", playFor(perf).name);
-    result += ` ${playFor(perf).name}: ${usd(amountFor(perf))} (${
-      perf.audience
-    } seats)\n`;
-  }
-
-  result += `Amount owed is ${usd(
-    totalAmount(invoice.performances)
-  )}\n`;
-  result += `You earned ${totalVolumeCredits(
-    invoice.performances
-  )} credits\n`;
-  return result;
+function statement(invoice, type) {
+  return type === "txt" ? renderPlainText(invoice) : renderHtmlMarkup(invoice);
 }
 
 function enrichPerformance(aPerformance) {
@@ -95,18 +100,18 @@ function enrichPerformance(aPerformance) {
   return result;
 }
 
-function renderPlainText(data, invoice, plays) {
-  let result = `Statement for ${data.customer}\n`;
-
-  for (let perf of data.performances) {
-    // print line for this order
-    result += ` ${perf.play.name}: ${usd(perf.amount)} (${
+function renderPlainText(invoice) {
+  
+  let result = `Statment for ${invoice.customer}\n`;
+  for (let perf of invoice.performances) {
+    result += ` ${playFor(perf).name}: ${usd(amountFor(perf))} (${
       perf.audience
     } seats)\n`;
   }
 
-  result += `Amount owed is ${usd(data.totalAmount)}\n`;
-  result += `You earned ${data.totalVolumeCredits} credits\n`;
+  result += `Amount owed is ${usd(totalAmount(invoice.performances))}\n`;
+  result += `You earned ${totalVolumeCredits(invoice.performances)} credits\n`;
+
   return result;
 }
 
@@ -119,6 +124,7 @@ async function szymon() {
     // const { default: plays } = await import("./plays.json", {
     //   assert: { type: "json" },
     // });
+    createFile('html', statement(invoice));
     console.log(statement(invoice, plays));
   } catch (err) {
     console.log("err", err);
