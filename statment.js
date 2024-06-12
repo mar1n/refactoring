@@ -1,14 +1,5 @@
 import { writeFile, writeFileSync } from 'fs';
 
-function renderHtmlMarkup(invoice) {
-  return `
-    Statment for ${invoice.customer}
-    </br>
-    Amount owed is ${usd(totalAmount(invoice.performances))}
-    </br>
-    You earned ${totalVolumeCredits(invoice.performances)} credits`;
-}
-
 function createFile(fileType, content) {
   writeFile(`statement.${fileType}`, content, (err) => {
     if (err) {
@@ -89,7 +80,7 @@ function totalAmount(data) {
 }
 
 function statement(invoice, type) {
-  return type === "txt" ? renderPlainText(invoice) : renderHtmlMarkup(invoice);
+  return renderContent(invoice, type);
 }
 
 function enrichPerformance(aPerformance) {
@@ -100,17 +91,17 @@ function enrichPerformance(aPerformance) {
   return result;
 }
 
-function renderPlainText(invoice) {
-  
-  let result = `Statment for ${invoice.customer}\n`;
+function renderContent(invoice, type) {
+  let newLine = type === "txt" ? `\n` : `</br>`;
+  let result = `Statment for ${invoice.customer}${newLine}`;
   for (let perf of invoice.performances) {
     result += ` ${playFor(perf).name}: ${usd(amountFor(perf))} (${
       perf.audience
-    } seats)\n`;
+    } seats)${newLine}`;
   }
 
-  result += `Amount owed is ${usd(totalAmount(invoice.performances))}\n`;
-  result += `You earned ${totalVolumeCredits(invoice.performances)} credits\n`;
+  result += `Amount owed is ${usd(totalAmount(invoice.performances))}${newLine}`;
+  result += `You earned ${totalVolumeCredits(invoice.performances)} credits${newLine}`;
 
   return result;
 }
@@ -124,8 +115,8 @@ async function szymon() {
     // const { default: plays } = await import("./plays.json", {
     //   assert: { type: "json" },
     // });
-    createFile('html', statement(invoice));
-    console.log(statement(invoice, plays));
+    createFile('txt', statement(invoice, 'txt'));
+    console.log(statement(invoice, "txt"));
   } catch (err) {
     console.log("err", err);
   }
