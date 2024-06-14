@@ -80,7 +80,21 @@ function totalAmount(data) {
 }
 
 function statement(invoice, type) {
-  return renderContent(invoice, type);
+  const statementData =  {};
+  statementData.customer = invoice.customer;
+  statementData.performances = invoice.performances.map(enrichPerformance);
+  statementData.totalAmount = totalAmount(statementData.performances);
+  statementData.totalVolumeCredits = totalVolumeCredits(statementData.performances);
+  return renderContent(createStatementData(invoice), type);
+}
+
+function createStatementData(invoice) {
+  const statementData =  {};
+  statementData.customer = invoice.customer;
+  statementData.performances = invoice.performances.map(enrichPerformance);
+  statementData.totalAmount = totalAmount(statementData.performances);
+  statementData.totalVolumeCredits = totalVolumeCredits(statementData.performances);
+  return statementData
 }
 
 function enrichPerformance(aPerformance) {
@@ -91,17 +105,17 @@ function enrichPerformance(aPerformance) {
   return result;
 }
 
-function renderContent(invoice, type) {
+function renderContent(data, type) {
   let newLine = type === "txt" ? `\n` : `</br>`;
-  let result = `Statment for ${invoice.customer}${newLine}`;
-  for (let perf of invoice.performances) {
+  let result = `Statment for ${data.customer}${newLine}`;
+  for (let perf of data.performances) {
     result += ` ${playFor(perf).name}: ${usd(amountFor(perf))} (${
       perf.audience
     } seats)${newLine}`;
   }
 
-  result += `Amount owed is ${usd(totalAmount(invoice.performances))}${newLine}`;
-  result += `You earned ${totalVolumeCredits(invoice.performances)} credits${newLine}`;
+  result += `Amount owed is ${usd(data.totalAmount)}${newLine}`;
+  result += `You earned ${data.totalVolumeCredits} credits${newLine}`;
 
   return result;
 }
