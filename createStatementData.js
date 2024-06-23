@@ -9,7 +9,7 @@ class PerformanceCalculator {
     this.performances = aPerformance;
     this.play = aPlay;
   }
-  getAmount() {
+  get amount() {
     let result = 0;
     switch (this.play.type) {
       case "tragedy":
@@ -30,6 +30,13 @@ class PerformanceCalculator {
     }
     return result;
   }
+  get volumeCredits() {
+    let result = 0;
+    result += Math.max(this.performances.audience - 30, 0);
+    if ("comedy" === this.play.type)
+      result += Math.floor(this.performances.audience / 5);
+    return result;
+  }
 }
 
 export default function createStatementData(invoice) {
@@ -46,8 +53,8 @@ export default function createStatementData(invoice) {
     const calculator = new PerformanceCalculator(aPerformance, playFor(aPerformance));
     const result = Object.assign({}, aPerformance);
     result.play = calculator.play;
-    result.amount = calculator.getAmount();
-    result.volumeCredits = volumeCreditsFor(result);
+    result.amount = calculator.amount;
+    result.volumeCredits = calculator.volumeCredits;
     return result;
   }
   function totalAmount(data) {
