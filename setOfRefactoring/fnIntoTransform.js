@@ -10,10 +10,10 @@ function taxableCharge(reading) {
 }
 
 function enrichReading(argReading) {
-    const aReading = _.cloneDeep(argReading);
-    // aReading.baseCharge = baseCharge(aReading);
-    // aReading.taxableCharge = taxableCharge(aReading);
-    return aReading;
+    const result = _.cloneDeep(argReading);
+    result.baseCharge = baseCharge(result);
+    result.taxableCharge = taxableCharge(result);
+    return result;
 }
 
 console.log("enrichReading", enrichReading(reading));
