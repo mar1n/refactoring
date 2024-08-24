@@ -8,8 +8,8 @@ class Organization {
     get country() {return this._country};
     set country(aCountryCode) { this._country = aCountryCode};
 }
-
-// class Organization {
+    
+    // class Organization {
 //     constructor(data) {
 //         this._name = data.name;
 //         this._country = data.country;
